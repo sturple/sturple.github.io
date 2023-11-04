@@ -1,1 +1,0 @@
-const e=JSON.parse('{"key":"v-8daa1a0e","path":"/","title":"Turple Website","lang":"en-US","frontmatter":{},"headers":[],"git":{"contributors":[{"name":"S Turple","email":"shawn.turple@gmail.com","commits":1}]},"filePathRelative":"README.md"}');export{e as data};
