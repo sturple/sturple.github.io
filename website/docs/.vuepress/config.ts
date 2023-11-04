@@ -18,6 +18,14 @@ export default defineUserConfig({
         text: 'Home',
         link: '/',
       },
+      {
+        text: 'Containers',
+        link: '/guide/containers/index.md',
+      },
+      {
+        text: 'Kubernetes',
+        link: '/guide/kubernetes/index.md',
+      },
     ],
   }),
   plugins: [
