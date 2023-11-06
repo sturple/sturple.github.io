@@ -150,9 +150,8 @@ nginx:template
 ```
 #### Using docker-compose
 ```sh
-docker compose \
--f https://github.com/sturple/sturple.github.io.git#:docker/nginx/docker-compose.yaml \
-up
+# you will need to create a docker-compose.yaml locally
+docker compose -f docker-compose.yaml up
 ```
 @[code](../../../../docker/nginx/docker-compose.yaml)
 
