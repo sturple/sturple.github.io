@@ -1,0 +1,3 @@
+FROM nginx
+# As of Nginx 1.19 you can use templates
+COPY ./default.conf.template /etc/nginx/templates/
