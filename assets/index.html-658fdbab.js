@@ -1,0 +1,1 @@
+import{_ as t,o as s,c as a,a as e,b as n}from"./app-fa50dad8.js";const r={},c=e("h1",{id:"kubernetes-guides",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#kubernetes-guides","aria-hidden":"true"},"#"),n(" Kubernetes Guides")],-1),d=[c];function o(i,_){return s(),a("div",null,d)}const h=t(r,[["render",o],["__file","index.html.vue"]]);export{h as default};

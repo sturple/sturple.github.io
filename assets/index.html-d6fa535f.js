@@ -1,1 +1,0 @@
-import{_ as t,o as a,c as r,a as e,b as s}from"./app-e4d3735c.js";const c={},n=e("h1",{id:"turple-website",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#turple-website","aria-hidden":"true"},"#"),s(" Turple Website")],-1),o=[n];function i(_,d){return a(),r("div",null,o)}const h=t(c,[["render",i],["__file","index.html.vue"]]);export{h as default};
