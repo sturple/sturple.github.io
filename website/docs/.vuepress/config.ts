@@ -1,13 +1,8 @@
 import { defaultTheme } from "@vuepress/theme-default";
-import { debug } from "@vuepress/utils";
 
 import { defineUserConfig } from "vuepress";
 import { searchPlugin } from "@vuepress/plugin-search";
-import { getDirname, path } from '@vuepress/utils';
 import { googleAnalyticsPlugin } from '@vuepress/plugin-google-analytics'
-
-
-const __dirname = getDirname(import.meta.url)
 
 
 export default defineUserConfig({

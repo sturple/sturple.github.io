@@ -18,8 +18,5 @@
         "@vuepress/plugin-google-analytics": "^2.0.0-beta.67",
         "@vuepress/plugin-search": "^2.0.0-beta.67",
         "vuepress": "^2.0.0-beta.67"
-    },
-    "dependencies": {
-        "debug": "^4.3.4"
     }
 }
