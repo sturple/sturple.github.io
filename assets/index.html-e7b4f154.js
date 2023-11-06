@@ -1,1 +1,0 @@
-import{_ as s,o as r,c as d,a as e,d as t}from"./app-fa1c0bc4.js";const a={},o=e("h1",{id:"wordpress-guides",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#wordpress-guides","aria-hidden":"true"},"#"),t(" WordPress Guides")],-1),c=[o];function n(i,_){return r(),d("div",null,c)}const l=s(a,[["render",n],["__file","index.html.vue"]]);export{l as default};
