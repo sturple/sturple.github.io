@@ -35,7 +35,7 @@ export default defineUserConfig({
       // options
     }),
     googleAnalyticsPlugin({
-      id: 'G-FX6HXTQK7G'
+      id: 'G-49MN2FWTBZ'
     }),
   ],
 });

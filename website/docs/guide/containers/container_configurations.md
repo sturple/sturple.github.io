@@ -1,127 +1,190 @@
 ---
 title: Container configuration with Nginx
-description: Understanding container configurations with environment variables and configurations.
+description: Understanding container configurations with environment variables.
 date: 2023-11-5
 ---
 
 # Container Configurations with Nginx
-
 ## Objective
-To understand ways that a container can be modified with the use of environment variables, and configuration file mounting.  
-
-
+To understand how a container's configuration can be modified with the use of environment variables.  
 
 ## Prerequisites
 - Docker
-- Terminal program (Mac/Linux)
+- Terminal program
 - [Nginx Image Documentation](https://hub.docker.com/_/nginx)
 
 
-## Deploy simple Nginx container <Badge text="demo" />
-Using the nginx official docker image we are going to run the following command to create a simple Nginx webserver.
+## Deploy a simple Nginx container
+Using the official Nginx image and running a docker command to create a simple Nginx web server.
+:::: code-group
+::: code-group-item Try me
 ```sh
 docker run --name learning-nginx --rm  -p 30001:80 nginx
 ```
+:::
+::::
 
 This runs a docker container with:
 - `--name learning-nginx` name of the container
-- `--rm` removes container
-- `-p 30001:80` maps your machine port as `30001` but connects to the container at port `80`
+- `--rm` removes container after the process is exited
+- `-p 30001:80` maps your machine's port `30001` to the container port `80`
 - `nginx` the image name
 
-Going to [127.0.0.1:30001](http://127.0.0.1:30001) should show you have connected to Nginx server.
+Going to [127.0.0.1:30001](http://127.0.0.1:30001) should serve an Nginx web server.
 
 ![nginx screenshot](/images/nginx-docker-run.png)
 
-### Understanding env
+## Reasons for Changing configurations.
+Environment variables, and mounting configurations files allow an image to be more versatile for different deployment configurations.
+- Nginx's `hostname` and `port` number are configurations that might need to be changed
+- Nginx default hostname is `localhost` and default port is `80`
+- There are a few ways to modify these configuration, lets take a look in the following examples.
 
-- in order to see all the environment variables run `docker exec -it learning-nginx env`
- - this command executes an interactive terminal for the container `learning-nginx`
- - then it runs the `env` command, which gets all the environment variables for this container
- - running `env` on your local machine will also give you a list of all these variables
-- lets also check the default configuration for Nginx `docker exec -it learning-nginx cat /etc/nginx/conf.d/default.conf`
- - this echo's out your configuration file to the screen.
- - You should note that the ports it is using is port 80
+### Example 1 - Create a new image
+Creating new images from existing images, is an easy way to update a configuration.
+Lets say we need to update the Nginx port to 8080, because our platform doesn't allow the use of [privileged ports](https://www.w3.org/Daemon/User/Installation/PrivilegedPorts.html) like port 80.
+- We would create a docker image by making a new file named `Dockerfile`
+- We would then add our new configurations which is determined by this `Dockerfile`
+- The simplest way to modify the configuration is by using the `sed` command, this is what we did in our example
+- Another way of modifying the configurations is to copy new files into the image
 
-### .env
+
+
+To create this image run the following command.  This will create a new nginx image with a tag of port8080 `nginx:port8080` using the `Dockerfile` shown in this example.
+
+:::: code-group
+::: code-group-item Try me
+```sh:no-line-numbers
+# builds new image `nginx:port8080`
+docker buildx build \
+-t nginx:port8080 \
+-f Dockerfile.sed \
+--output type=docker \
+https://github.com/sturple/sturple.github.io.git#:docker/nginx
+```
+:::
+::: code-group-item Dockerfile
+@[code docker](../../../../docker/nginx/Dockerfile.sed)
+:::
+::::
+
+If we try changing the default Nginx image to use port 8080, without changing the configuration it will fail
+:::: code-group
+::: code-group-item This fails 
 ```sh
-# docker exec -it learning-nginx env
+# This fails because the Nginx container is still listening on port 80.
+docker run --name learning-nginx --rm  -p 30001:8080 nginx
+```
+:::
+::: code-group-item This works
+```sh
+# this works because we modified the port in the image
+docker run --name learning-nginx --rm  -p 30001:8080 nginx:port8080
+```
+:::
+::::
+
+This solves the problem of being able to change ports. Though this has one big disadvantage, you have to create a new image for every new configuration change.
+
+### Example 2 - Adding configuration templates
+
+A better approach would be to use Nginx's templates, and pass ENV's into the container.
+- There needs to be a `template` added to the Nginx image as shown
+- A new docker image will be created by a `Dockerfile`, which adds this template as shown
+- Deploy the new image
+
+:::: code-group
+::: code-group-item Try me
+```sh:no-line-numbers
+# builds new image `nginx:template`
+docker buildx build \
+-t nginx:template \
+-f Dockerfile.template \
+--output type=docker \
+https://github.com/sturple/sturple.github.io.git#:docker/nginx
+```
+::: 
+::: code-group-item Dockerfile
+@[code docker](../../../../docker/nginx/Dockerfile.template)
+:::
+::: code-group-item default.conf.template
+@[code](../../../../docker/nginx/default.conf.template)
+:::
+::::
+
+In order to checkout out our new image, lets test it out on a couple different ports.
+#### Using docker run
+```sh:no-line-numbers
+# This should use the default port, when new env variables are passed.
+docker run \
+--name learning-nginx \
+--rm \
+-e NGINX_PORT=80 \
+-e NGINX_HOST=localhost \
+-p 30001:80 \
+nginx:template
+
+# This should work, with Nginx using port 8080
+docker run \
+--name learning-nginx \
+--rm \
+-e NGINX_PORT=8080 \
+-e NGINX_HOST=localhost \
+-p 30001:8080 \
+nginx:template
+
+# Lets change NGINX_HOST to example.com, 
+# you will have to add an entry to your hosts file
+#/etc/hosts
+...
+127.0.0.1  example.com
+
+# This should work, with Nginx using port 8080 and going to http://example.com:30001
+docker run \
+--name learning-nginx \
+--rm \
+-e NGINX_PORT=8080 \
+-e NGINX_HOST=example.com \
+-p 30001:8080 \
+nginx:template
+```
+#### Using docker-compose
+```sh
+docker compose \
+-f https://github.com/sturple/sturple.github.io.git#:docker/nginx/docker-compose.yaml \
+up
+```
+@[code](../../../../docker/nginx/docker-compose.yaml)
+
+The disadvantage of using the templates (Nginx configuration limitation), is that there is no way of adding fallback values, so these environment variables always have to be passed.  Though the advantage, is that you have a highly configurable image.
+
+
+In order to see all the environment variables that the Nginx container is using view the output.  Notice the `NGINX_PORT=8080` and the `NGINX_HOST=example.com`.
+:::: code-group
+::: code-group-item Try me
+ ```sh{2}:no-line-numbers
+docker exec -it learning-nginx env
+```
+:::
+::: code-group-item Output
+```sh{4,5}:no-line-numbers
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-HOSTNAME=0c82c4e4108d
+HOSTNAME=49e1ae7b4f62
 TERM=xterm
-NGINX_VERSION=1.25.1
-NJS_VERSION=0.7.12
+NGINX_PORT=8080
+NGINX_HOST=example.com
+NGINX_VERSION=1.25.3
+NJS_VERSION=0.8.2
 PKG_RELEASE=1~bookworm
 HOME=/root
 ```
+:::
+::::
 
+## Conclusion
+Environmental variables within an image or the `env` on your local computer, allow configurations to be modified to change its operation.  In the case of Nginx it is used for changing the `NGINX_PORT` and the `NGINX_HOST`.  Other images like [postgres](https://hub.docker.com/_/postgres) are used to change `POSTGRES_PASSWORD`, `POSTGRES_USER`, and `POSTGRES_DB`.
 
-```sh
-docker buildx build -t nginx:port8080 -f Dockerfile.sed --output type=docker https://github.com/sturple/sturple.github.io.git#:docker/nginx
-```
-## What if I have another application running on port 80.
-- Sometimes port 80 is used, and you have to use another port.
-- According to the [Nginx Documentation](https://hub.docker.com/_/nginx) there is a environment variable for this `NGINX_PORT`
-- We can pass environment variables into our docker run command 
-```sh
-docker run --name learning-nginx --rm -e NGINX_PORT=8080 -p 30001:8080 nginx:port8080
-```
-
-```sh
-docker run --name learning-nginx --rm -e NGINX_PORT=8080 -p 30001:8080 nginx:template
-```
-
- - we also have to change the destination port.
- - However this doesn't work, it doesn't work because of the Nginx default.conf configuration.
-- We need to mount a new configuration with its ports connect to `8001`, run `docker run --name learning-nginx --rm -e NGINX_PORT=8001 -p 30001:8001 -v ./HowTo/Kubernetes/ConfigMaps/default.conf:/etc/nginx/conf.d/default.conf nginx`
- - the site 127.0.0.1:8080 should now work.
- - check the env again by running `docker exec -it learning-nginx env`, you should notice the variable `NGINX_PORT`
- - check the configuration again by running `docker exec -it learning-nginx cat /etc/nginx/conf.d/default.conf`
-- We can also pass our own environment variables `docker run --name learning-nginx --rm -e HELLO=WORLD -p 30001:80 nginx`
- - this will give us access to the env `HELLO`, but Nginx does not use this env.
-
-### .env with NGINX_PORT
-```sh
-# docker exec -it learning-nginx env
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-HOSTNAME=6ea0a10b35ee
-TERM=xterm
-NGINX_PORT=8001 # <-- This is new, it is the env that we passed
-NGINX_VERSION=1.25.1
-NJS_VERSION=0.7.12
-PKG_RELEASE=1~bookworm
-HOME=/root
-
-```
-
-## nginx default.conf with ports changed
-
-@[code](../../.vuepress/public/code/2023/11/default.conf)
-
-## Deploy to Kubernetes
-In order to deploy this simple Nginx example to kubernetes we have to create a deployment
-- [Kubernetes deployment documentation](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
-- For the deployment we only need some basic information
- - apiVersion
- - kind
- - metadata (name, namespace)
- - containers.
-- to run this deployment just run `oc apply -f ./HowTo/Kubernetes/ConfigMaps/deployment-simple.yaml`
- - to view the status of this deployment run `kubectl get pods`, if successful the status should indicate running.
- - Unlike docker you can't access this pod directly, so you have to port-forward.
-
-@[code yaml](../../.vuepress/public/code/2023/11/simple-deployment.yaml)
-
-
-## Update the configuration
-
-- run `docker run --name des-learning-nginx --rm -e NGINX_PORT=8001 -p 30001:8001 nginx`
- - this probably works, but when you refresh, it no longer works.
- - This is because your nginx file is still looking for requests from 8001 but nginx is not setup.
- - Lets create a file called default.conf and put the contents of below in it.
- - we are now going to use the default.conf to mount as the default.
-- run `docker run --name des-learning-nginx --rm -e NGINX_PORT=30001 -p 30001:8001 -v ./HowTo/Kubernetes/ConfigMaps/default.conf:/etc/nginx/conf.d/default.conf nginx`
-- this should now work... why.. because you updated the conf.
-- we updated an env, we updated a config.
-
-
+Ways to pass environment variables:
+- When running `docker run` you use the `-e` flag 
+- Docker compose you pass them using the `environment` property
+- Kubernetes you pass these using [ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
