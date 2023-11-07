@@ -17,7 +17,6 @@ spec:
       ref: master
       uri: https://github.com/sturple/sturple.github.io.git
     contextDir: docker/nginx
-    dockerfile: Dockerfile.template
   strategy:
     type: Docker
     buildArgs:
