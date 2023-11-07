@@ -14,7 +14,7 @@ spec:
   source:
     type: Git
     git:
-      ref: main
+      ref: master
       uri: https://github.com/sturple/sturple.github.io.git
     contextDir: docker/nginx
     dockerfile: Dockerfile.template
@@ -23,8 +23,6 @@ spec:
     buildArgs:
     - name: CODE_VERSION
       value:  1.24.0
-    - name: PLATFORM
-      value: linux/amd64
   output:
     to:
       kind: ImageStreamTag
