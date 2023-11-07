@@ -1,0 +1,31 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: nginx-build-config
+  annotations:
+    description: This builds the nginx image from GIT source.
+strategy:
+  dockerStrategy:
+    forcePull: true
+spec:
+  successfulBuildsHistoryLimit: 2
+  failedBuildsHistoryLimit: 2
+  runPolicy: Serial
+  source:
+    type: Git
+    git:
+      ref: main
+      uri: https://github.com/sturple/stuprle.github.io.git
+    contextDir: docker/nginx
+    dockerfile: Dockerfile.template
+  strategy:
+    type: Docker
+    buildArgs:
+      - name: CODE_VERSION
+        value:  1.24.0
+      - name: PLATFORM
+        value: linux/amd64
+  output:
+    to:
+      kind: ImageStreamTag
+      name: nginx:template
