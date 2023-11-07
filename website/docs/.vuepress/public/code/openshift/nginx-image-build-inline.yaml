@@ -1,7 +1,7 @@
 kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
-  name: nginx-build-config
+  name: nginx-build-inline-config
   annotations:
     description: This builds the nginx image from inline dockerfile.
 strategy:
@@ -22,10 +22,10 @@ spec:
   strategy:
     type: Docker
     buildArgs:
-      - name: CODE_VERSION
-        value:  1.25.3
-      - name: PORT
-        value: 8081
+    - name: CODE_VERSION
+      value:  1.25.3
+    - name: PORT
+      value: 8081
   output:
     to:
       kind: ImageStreamTag
