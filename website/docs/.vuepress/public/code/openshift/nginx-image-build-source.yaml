@@ -20,6 +20,9 @@ spec:
   strategy:
     type: Docker
     dockerStrategy:
+      from:
+        kind: DockerImage
+        name: nginx:1.23.3-alpine
       dockerfilePath: Dockerfile.template
       buildArgs:
       - name: CODE_VERSION
@@ -27,4 +30,4 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: nginx:template
+      name: nginx:from-source
