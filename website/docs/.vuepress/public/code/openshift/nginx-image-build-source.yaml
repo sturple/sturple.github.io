@@ -30,4 +30,4 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: nginx:template
+      name: nginx:from-source
