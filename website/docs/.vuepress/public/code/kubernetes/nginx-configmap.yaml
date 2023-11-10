@@ -1,0 +1,10 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-configmap
+  labels:
+    app: nginx-app
+data:
+  NGINX_PORT: "8080"
+  NGINX_HOST: localhost
+  HELLO: world

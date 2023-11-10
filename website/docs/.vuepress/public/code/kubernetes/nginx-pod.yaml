@@ -1,0 +1,55 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx-app
+spec:
+  volumes:
+    - name: secrets-volume
+      defaultMode: 420
+      secret:
+        secretName: nginx-secret
+    - name: secrets-volume-key-pair
+      defaultMode: 420
+      secret:
+        secretName: nginx-secret
+        items:
+          - key: secret1
+            path: _secret1
+          - key: secret2
+            path: my_custom_secret
+      
+  containers:
+    - name: nginx
+      image: >-
+        image-registry.openshift-image-registry.svc:5000/e9b785-tools/nginx:dev
+      envFrom:
+        - configMapRef:
+            name: nginx-configmap
+        - secretRef:
+            name: nginx-secret
+      env:
+        - name: NGINX__MY_CUSTOM_ENV_FROM_KEY_HELLO
+          valueFrom:
+            configMapKeyRef:
+              name: nginx-configmap
+              key: HELLO
+        - name: my_secret_1
+          valueFrom:
+            secretKeyRef:
+              name: nginx-secret
+              key: secret1
+      volumeMounts:
+        - name: secrets-volume
+          readOnly: true
+          mountPath: /run/secrets/nginx
+        - name: secrets-volume-key-pair
+          mountPath: /run/secrets/_secret1
+          subPath: _secret1
+          readOnly: true
+        - name: secrets-volume-key-pair
+          mountPath: /run/secrets/my_custom_secret
+          subPath: my_custom_secret
+          readOnly: true
+

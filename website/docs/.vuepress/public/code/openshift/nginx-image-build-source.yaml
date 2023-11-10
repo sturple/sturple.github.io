@@ -1,7 +1,7 @@
 kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
-  name: nginx-build-config
+  name: nginx-build-source-config
   annotations:
     description: This builds the nginx image from GIT source.
 strategy:
@@ -26,7 +26,7 @@ spec:
       dockerfilePath: Dockerfile.template
       buildArgs:
       - name: CODE_VERSION
-        value:  1.24.0
+        value:  "1.24.0"
   output:
     to:
       kind: ImageStreamTag
