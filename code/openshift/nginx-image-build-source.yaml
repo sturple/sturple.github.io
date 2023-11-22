@@ -1,7 +1,7 @@
 kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
-  name: nginx-build-config
+  name: nginx-build-source-config
   annotations:
     description: This builds the nginx image from GIT source.
 strategy:
